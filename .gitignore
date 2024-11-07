@@ -1,4 +1,22 @@
-# Gradle files
+# built application files
+*.apk
+*.ap_
+
+# Mac files
+.DS_Store
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated files
+bin/
+gen/
+
+# Ignore gradle files
+
 .gradle/
 build/
 
@@ -31,3 +49,4 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
