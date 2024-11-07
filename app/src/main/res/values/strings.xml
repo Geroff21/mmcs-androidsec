@@ -28,6 +28,9 @@
     <string name="item_price_req">Item Price*</string>
     <string name="no">No</string>
     <string name="price">Price</string>
+    <string name="providerName">Provider name</string>
+    <string name="providerEmail">Provider email</string>
+    <string name="providerPhone">Provider phone</string>
     <string name="quantity_in_stock">Quantity in stock</string>
     <string name="in_stock">%d in stock</string>
     <string name="quantity_req">Quantity in Stock*</string>
@@ -35,4 +38,6 @@
     <string name="sell">Sell</string>
     <string name="yes">Yes</string>
     <string name="required_fields">*required fields</string>
+    <string name="share_with">Share</string>
+    <string name="share">Share</string>
 </resources>

@@ -33,6 +33,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
@@ -47,6 +49,8 @@ import com.example.inventory.ui.navigation.NavigationDestination
 import com.example.inventory.ui.theme.InventoryTheme
 import java.util.Currency
 import java.util.Locale
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 object ItemEntryDestination : NavigationDestination {
     override val route = "item_entry"
@@ -61,6 +65,9 @@ fun ItemEntryScreen(
     canNavigateBack: Boolean = true,
     viewModel: ItemEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+
+    val coroutineScope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             InventoryTopAppBar(
@@ -73,7 +80,12 @@ fun ItemEntryScreen(
         ItemEntryBody(
             itemUiState = viewModel.itemUiState,
             onItemValueChange = viewModel::updateUiState,
-            onSaveClick = { },
+            onSaveClick = {
+                coroutineScope.launch {
+                    viewModel.saveItem()
+                    navigateBack()
+                }
+            },
             modifier = Modifier
                 .padding(
                     start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
@@ -120,6 +132,12 @@ fun ItemInputForm(
     onValueChange: (ItemDetails) -> Unit = {},
     enabled: Boolean = true
 ) {
+
+    // Локальные состояния ошибок
+    val providerNameError = remember { mutableStateOf<String?>(null) }
+    val providerEmailError = remember { mutableStateOf<String?>(null) }
+    val providerPhoneError = remember { mutableStateOf<String?>(null) }
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
@@ -166,6 +184,59 @@ fun ItemInputForm(
             enabled = enabled,
             singleLine = true
         )
+        OutlinedTextField(
+            value = itemDetails.providerName,
+            onValueChange = {
+                onValueChange(itemDetails.copy(providerName = it))
+                providerNameError.value = validateProviderName(it)
+            },
+            label = { Text(stringResource(R.string.providerName)) },
+            isError = providerNameError.value != null,
+            supportingText = {
+                providerNameError.value?.let { errorText ->
+                    Text(text = errorText, color = MaterialTheme.colorScheme.error)
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+
+        OutlinedTextField(
+            value = itemDetails.providerEmail,
+            onValueChange = {
+                onValueChange(itemDetails.copy(providerEmail = it))
+                providerEmailError.value = validateProviderEmail(it)
+            },
+            label = { Text(stringResource(R.string.providerEmail)) },
+            isError = providerEmailError.value != null,
+            supportingText = {
+                providerEmailError.value?.let { errorText ->
+                    Text(text = errorText, color = MaterialTheme.colorScheme.error)
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+
+        OutlinedTextField(
+            value = itemDetails.providerPhone,
+            onValueChange = {
+                onValueChange(itemDetails.copy(providerPhone = it))
+                providerPhoneError.value = validateProviderPhone(it)
+            },
+            label = { Text(stringResource(R.string.providerPhone)) },
+            isError = providerPhoneError.value != null,
+            supportingText = {
+                providerPhoneError.value?.let { errorText ->
+                    Text(text = errorText, color = MaterialTheme.colorScheme.error)
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
         if (enabled) {
             Text(
                 text = stringResource(R.string.required_fields),
@@ -173,6 +244,19 @@ fun ItemInputForm(
             )
         }
     }
+}
+
+// Вспомогательные функции для валидации данных
+fun validateProviderName(name: String): String? {
+    return if (name.isBlank()) "Name is required" else null
+}
+
+fun validateProviderEmail(email: String): String? {
+    return if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) "Invalid email address" else null
+}
+
+fun validateProviderPhone(phone: String): String? {
+    return if (!phone.matches(Regex("^[+]?[0-9]{10,13}\$"))) "Invalid phone number" else null
 }
 
 @Preview(showBackground = true)

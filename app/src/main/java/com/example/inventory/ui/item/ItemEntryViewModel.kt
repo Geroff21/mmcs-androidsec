@@ -26,7 +26,9 @@ import java.text.NumberFormat
 /**
  * ViewModel to validate and insert items in the Room database.
  */
-class ItemEntryViewModel : ViewModel() {
+import com.example.inventory.data.ItemsRepository
+
+class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewModel() {
 
     /**
      * Holds current item ui state
@@ -48,6 +50,12 @@ class ItemEntryViewModel : ViewModel() {
             name.isNotBlank() && price.isNotBlank() && quantity.isNotBlank()
         }
     }
+
+    suspend fun saveItem() {
+        if (validateInput()) {
+            itemsRepository.insertItem(itemUiState.itemDetails.toItem())
+        }
+    }
 }
 
 /**
@@ -63,6 +71,10 @@ data class ItemDetails(
     val name: String = "",
     val price: String = "",
     val quantity: String = "",
+    val providerName: String = "",
+    val providerEmail: String = "",
+    val providerPhone: String = "",
+
 )
 
 /**
@@ -74,7 +86,10 @@ fun ItemDetails.toItem(): Item = Item(
     id = id,
     name = name,
     price = price.toDoubleOrNull() ?: 0.0,
-    quantity = quantity.toIntOrNull() ?: 0
+    quantity = quantity.toIntOrNull() ?: 0,
+    providerName = providerName,
+    providerEmail = providerEmail,
+    providerPhone = providerPhone,
 )
 
 fun Item.formatedPrice(): String {
@@ -96,5 +111,8 @@ fun Item.toItemDetails(): ItemDetails = ItemDetails(
     id = id,
     name = name,
     price = price.toString(),
-    quantity = quantity.toString()
+    quantity = quantity.toString(),
+    providerName = providerName,
+    providerEmail = providerEmail,
+    providerPhone = providerPhone
 )
